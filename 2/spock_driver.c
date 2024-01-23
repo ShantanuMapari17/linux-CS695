@@ -115,10 +115,12 @@ static unsigned long getPhysical(unsigned long v_addr, struct mm_struct *mm)
 /*function to get k_vadrr from page using kmap*/
 static unsigned long getKVirt(unsigned long p_addr)
 {
-    unsigned long k_vadrr = 0;
-    k_vadrr = (unsigned long)kmap(pg);
-    printk(KERN_INFO "k_vadrr = %lx\n", k_vadrr);
-    return k_vadrr;
+    // unsigned long k_vadrr = 0;
+    // k_vadrr = (unsigned long)kmap(pg);
+    // printk(KERN_INFO "k_vadrr = %lx\n", k_vadrr);
+    // return k_vadrr;
+
+    return (unsigned long)phys_to_virt(p_addr);
 }
  
 static int my_open(struct inode *i, struct file *f)
