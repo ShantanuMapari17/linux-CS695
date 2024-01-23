@@ -8,6 +8,6 @@ int main(){
     x[0]=10;
     printf("Pid of the process is := %d \n", getpid());
     printf("Value of x : %d \t Address of x : 0x%lx \n\n",x[0],x);
-    sleep(120);
+    sleep(180);
     return 0;
 }

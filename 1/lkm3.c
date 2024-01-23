@@ -6,8 +6,9 @@
 #include <linux/pid.h>
 #include <linux/list.h>
 #include <linux/mm_types.h>
-#include<linux/mm.h>
-
+#include <linux/mm.h>
+#include <asm/pgtable-types.h>
+#include <asm/io.h>
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Shantanu Mapari");
 
@@ -31,7 +32,7 @@ static int __init Virtual_addr_to_physical_addr(void){
     pmd_t *pmd;
     pud_t *pud;
     pte_t *pte;
-
+    unsigned long pg_addr,page_offset;
     unsigned long phy_addr;
     if(task == NULL){
         printk(KERN_INFO "Task not found with the given PID\n");
@@ -68,21 +69,21 @@ static int __init Virtual_addr_to_physical_addr(void){
         return 0;
     }
 
-    pte = pte_offset_map(pmd, my_vaddr);
+    // pte = pte_offset_map(pmd, my_vaddr);
+    // if (pte_none(*pte)){
+    //     printk(KERN_INFO " pte error\n");
+    //     return 0;
+    // }
+    pte = pte_offset_kernel(pmd, my_vaddr);
     if (pte_none(*pte)){
         printk(KERN_INFO " pte error\n");
         return 0;
     }
-
-    pg = pte_page(*pte);
-
-    if(pg==NULL){
-        printk(KERN_INFO "Page not found\n");
-        return 0;
-    }
-
-    phy_addr = page_to_phys(pg);
     
+    /*pte to physical address*/
+    phy_addr = pte_pfn(*pte) << PAGE_SHIFT;
+    phy_addr |= my_vaddr & ~PAGE_MASK;
+
 
     printk(KERN_INFO "****____ Physical Address found for the given virtual adresss ____****\n");
     printk(KERN_INFO "Pid : %d\n V_addr : %lx \n Phy_add : %lx", my_pid, my_vaddr, phy_addr);
