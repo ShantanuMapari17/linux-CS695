@@ -6,6 +6,10 @@
 #include <linux/device.h>
 #include <linux/errno.h>
 #include <asm/uaccess.h>
+#include <asm/current.h>
+#include <linux/sched.h>
+#include <linux/mm.h>
+
 
 #include "spock-driver.h"
 
@@ -15,7 +19,78 @@
 static dev_t dev;
 static struct cdev c_dev;
 static struct class *cl;
-static int status = 1, dignity = 3, ego = 5;
+// static int status = 1, dignity = 3, ego = 5;
+static unsigned long v_addr=0;
+static unsigned long p_addr=0;
+static unsigned long k_vadrr=0;
+
+/*function to get physical address from v_addr and mm_struct pointer*/
+static unsigned long getPhysical(unsigned long v_addr, struct mm_struct *mm)
+{
+    pgd_t *pgd;
+    p4d_t *p4d;
+    pud_t *pud;
+    pmd_t *pmd;
+    pte_t *ptep, pte;
+    unsigned long p_addr = 0;
+    struct page *page;
+ 
+    pgd = pgd_offset(mm, v_addr);
+    if(pgd_none(*pgd) || pgd_bad(*pgd))
+    {
+        printk(KERN_INFO "not mapped in pgd\n");
+        return 0;
+    }
+
+    p4d = p4d_offset(pgd, v_addr);
+
+    if(p4d_none(*p4d) || p4d_bad(*p4d))
+    {
+        printk(KERN_INFO "not mapped in p4d\n");
+        return 0;
+    }
+
+    pud = pud_offset(p4d, v_addr);
+
+    if(pud_none(*pud) || pud_bad(*pud))
+    {
+        printk(KERN_INFO "not mapped in pud\n");
+        return 0;
+    }
+
+    pmd = pmd_offset(pud, v_addr);
+
+    if(pmd_none(*pmd) || pmd_bad(*pmd))
+    {
+        printk(KERN_INFO "not mapped in pmd\n");
+        return 0;
+    }
+ 
+    ptep = pte_offset_map(pmd, v_addr);
+    printk(KERN_INFO "ptep_val = %lx\n", pte_val(*ptep));
+    if (!ptep) {
+        printk(KERN_INFO "not mapped in pte\n");
+        return 0;
+    }
+ 
+    pte = *ptep;
+    page = pte_page(pte);
+    printk(KERN_INFO "page = %p\n", page);
+    if (!page) {
+        printk(KERN_INFO "not mapped in page\n");
+        return 0;
+    }
+ 
+    p_addr = page_to_phys(page);
+    printk(KERN_INFO "p_addr = %lx\n", p_addr);
+ 
+    return p_addr;
+}
+
+/*function to get k_vadrr from phys addr using phys_to_vert*/
+static unsigned long getKVirt(unsigned long p_addr){
+    return (unsigned long)phys_to_virt(p_addr);
+}
  
 static int my_open(struct inode *i, struct file *f)
 {
@@ -31,10 +106,28 @@ static int my_ioctl(struct inode *i, struct file *f, unsigned int cmd, unsigned 
 static long my_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 #endif
 {
+    int val;
  
     switch (cmd)
     {
-        case:
+        case VIRTUAL_TO_PHYSICAL:
+            printk(KERN_INFO "VIRTUAL_TO_PHYSICAL\n");
+            if(copy_from_user(&v_addr, (long *)arg, sizeof(long)))
+                return -EACCES;
+            printk(KERN_INFO "v_addr = %lx\n", v_addr);
+            p_addr = getPhysical(v_addr,current->mm);
+            printk(KERN_INFO "p_addr = %lx\n", p_addr);
+            k_vadrr = getKVirt(p_addr);
+            printk(KERN_INFO "k_vadrr = %lx\n", k_vadrr);
+            break;
+
+        case WRITE_TO_PHYSICAL:
+            printk(KERN_INFO "WRITE_TO_PHYSICAL\n");
+            if(copy_from_user(&val, (int *)arg, sizeof(int)))
+                return -EACCES;
+            printk(KERN_INFO "val = %d\n", val);
+            *(int *)k_vadrr = val;
+            break;
         default:
             return -EINVAL;
     }
