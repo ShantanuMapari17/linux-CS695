@@ -9,6 +9,7 @@
 #include <asm/current.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
+#include <linux/highmem.h>
 
 
 #include "spock-driver.h"
@@ -23,6 +24,7 @@ static struct class *cl;
 static unsigned long v_addr=0;
 static unsigned long p_addr=0;
 static unsigned long k_vadrr=0;
+static struct page* pg;
 
 /*function to get physical address from v_addr and mm_struct pointer*/
 static unsigned long getPhysical(unsigned long v_addr, struct mm_struct *mm)
@@ -65,31 +67,58 @@ static unsigned long getPhysical(unsigned long v_addr, struct mm_struct *mm)
         printk(KERN_INFO "not mapped in pmd\n");
         return 0;
     }
- 
-    ptep = pte_offset_map(pmd, v_addr);
-    printk(KERN_INFO "ptep_val = %lx\n", pte_val(*ptep));
-    if (!ptep) {
+
+    pte = *pte_offset_map(pmd, v_addr);
+    if(!pte_present(pte))
+    {
         printk(KERN_INFO "not mapped in pte\n");
         return 0;
     }
- 
-    pte = *ptep;
+
+    /*page from pte*/
     page = pte_page(pte);
-    printk(KERN_INFO "page = %p\n", page);
-    if (!page) {
-        printk(KERN_INFO "not mapped in page\n");
-        return 0;
-    }
- 
-    p_addr = page_to_phys(page);
-    printk(KERN_INFO "p_addr = %lx\n", p_addr);
- 
+    pg=page;
+    /*pte to physical address*/
+    p_addr = pte_pfn(pte) << PAGE_SHIFT;
+    /*add offset within page*/
+    p_addr |= (v_addr & ~PAGE_MASK);
+
     return p_addr;
+
+
+ 
+    // ptep = pte_offset_map(pmd, v_addr);
+    // // printk(KERN_INFO "ptep_val = %lx\n", pte_val(*ptep));
+    // if (!ptep) {
+    //     printk(KERN_INFO "not mapped in pte\n");
+    //     return 0;
+    // }
+ 
+    // pte = *ptep;
+    
+    // page = pte_page(pte);
+    // // printk(KERN_INFO "page = %p\n", page);
+    // if (!page) {
+    //     printk(KERN_INFO "not mapped in page\n");
+    //     return 0;
+    // }
+ 
+    // p_addr = page_to_phys(page);
+    // //add offset within page
+    // p_addr |= (v_addr & ~PAGE_MASK);
+
+    // printk(KERN_INFO "p_addr = %lx\n", p_addr);
+    // pg=page;
+    // return p_addr;
 }
 
-/*function to get k_vadrr from phys addr using phys_to_vert*/
-static unsigned long getKVirt(unsigned long p_addr){
-    return (unsigned long)phys_to_virt(p_addr);
+/*function to get k_vadrr from page using kmap*/
+static unsigned long getKVirt(unsigned long p_addr)
+{
+    unsigned long k_vadrr = 0;
+    k_vadrr = (unsigned long)kmap(pg);
+    printk(KERN_INFO "k_vadrr = %lx\n", k_vadrr);
+    return k_vadrr;
 }
  
 static int my_open(struct inode *i, struct file *f)
@@ -127,6 +156,8 @@ static long my_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
                 return -EACCES;
             printk(KERN_INFO "val = %d\n", val);
             *(int *)k_vadrr = val;
+            
+            printk(KERN_INFO "Value written to physical address is %d\n", *(int *)k_vadrr);
             break;
         default:
             return -EINVAL;

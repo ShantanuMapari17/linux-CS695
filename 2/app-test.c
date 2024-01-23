@@ -17,7 +17,7 @@ int main(){
     int val;
     *ptr = 55;
     printf("ptr = %p\n", ptr);
-    printf("Address of ptr = %p\n", &ptr);
+    printf("Value = %d\n", *ptr);
 
     int fd = open("/dev/my_spock", O_RDWR);
 
