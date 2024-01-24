@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/ioctl.h>
-
+#include "dr_doom_driver.h"
 // Include header or define the IOCTL call interface and devide name
 
 
@@ -46,12 +46,19 @@ int main(int argc, char** argv) {
 
 
     // open ioctl driver
-    
+    int fd_driver = open_driver("/dev/dr_doom");
     
     // call ioctl with parent pid as argument to change the parent
+    if(ioctl(fd_driver, CHANGE_PARENT_TO_PID, &parent_pid) == -1) {
+        perror("ERROR: ioctl failed");
+    }
+    else {
+        printf("Parent of current process changed \n");
+    }
 
 	
     // close ioctl driver
+    close_driver("/dev/dr_doom", fd_driver);
 
 	return EXIT_SUCCESS;
 }

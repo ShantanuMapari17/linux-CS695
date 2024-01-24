@@ -5,7 +5,7 @@ make
 
 ## Build your ioctl driver and load it here
 
-
+insmod dr_doom_driver.ko
 
 ###############################################
 
@@ -23,4 +23,4 @@ kill -9 $c_pid
 
 ## Remove the driver here
 
-
+rmmod dr_doom_driver 
