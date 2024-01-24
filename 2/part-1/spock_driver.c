@@ -86,40 +86,11 @@ static unsigned long getPhysical(unsigned long v_addr, struct mm_struct *mm)
     return p_addr;
 
 
- 
-    // ptep = pte_offset_map(pmd, v_addr);
-    // // printk(KERN_INFO "ptep_val = %lx\n", pte_val(*ptep));
-    // if (!ptep) {
-    //     printk(KERN_INFO "not mapped in pte\n");
-    //     return 0;
-    // }
- 
-    // pte = *ptep;
-    
-    // page = pte_page(pte);
-    // // printk(KERN_INFO "page = %p\n", page);
-    // if (!page) {
-    //     printk(KERN_INFO "not mapped in page\n");
-    //     return 0;
-    // }
- 
-    // p_addr = page_to_phys(page);
-    // //add offset within page
-    // p_addr |= (v_addr & ~PAGE_MASK);
-
-    // printk(KERN_INFO "p_addr = %lx\n", p_addr);
-    // pg=page;
-    // return p_addr;
 }
 
-/*function to get k_vadrr from page using kmap*/
+/*function to get kernel virtual address from physical address */
 static unsigned long getKVirt(unsigned long p_addr)
 {
-    // unsigned long k_vadrr = 0;
-    // k_vadrr = (unsigned long)kmap(pg);
-    // printk(KERN_INFO "k_vadrr = %lx\n", k_vadrr);
-    // return k_vadrr;
-
     return (unsigned long)phys_to_virt(p_addr);
 }
  
