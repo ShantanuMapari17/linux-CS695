@@ -1,0 +1,1 @@
+cmd_/home/cs695/linux-CS695/3/part-1/hello_procfs.ko := ld -r -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T arch/arm64/module.lds -o /home/cs695/linux-CS695/3/part-1/hello_procfs.ko /home/cs695/linux-CS695/3/part-1/hello_procfs.o /home/cs695/linux-CS695/3/part-1/hello_procfs.mod.o;  true
