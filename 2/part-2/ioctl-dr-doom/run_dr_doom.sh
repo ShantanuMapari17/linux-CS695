@@ -24,3 +24,4 @@ kill -9 $c_pid
 ## Remove the driver here
 
 rmmod dr_doom_driver 
+make clean

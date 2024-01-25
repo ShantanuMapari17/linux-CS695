@@ -57,29 +57,13 @@ static long my_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
                 return -EINVAL;
             }
 
-            struct task_struct *old_parent_task = current->parent;
-            struct list_head *old_parent_children = &old_parent_task->children;
-            struct list_head *old_parent_sibling = &current->sibling;
-            struct list_head *old_parent_children_next = old_parent_children->next;
-            struct list_head *old_parent_sibling_next = old_parent_sibling->next;
-            struct list_head *old_parent_children_prev = old_parent_children->prev;
-            struct list_head *old_parent_sibling_prev = old_parent_sibling->prev;
+            current->real_parent = parent_task;
+            current->parent = parent_task;
 
-            struct list_head *new_parent_children = &parent_task->children;
-            struct list_head *new_parent_sibling = &parent_task->sibling;
-            struct list_head *new_parent_children_next = new_parent_children->next;
-            struct list_head *new_parent_sibling_next = new_parent_sibling->next;
+            list_del(&(current->sibling));
+            list_add(&(current->sibling), parent_task->children.next);
 
-            list_del(old_parent_children);
-            list_del(old_parent_sibling);
-            list_del(new_parent_children);
-            list_del(new_parent_sibling);
 
-            list_add(old_parent_children, new_parent_children_next);
-            list_add(old_parent_sibling, new_parent_sibling_next);
-            list_add(new_parent_children, old_parent_children_next);
-            list_add(new_parent_sibling, old_parent_sibling_next);
-            
             printk(KERN_INFO "Parent of process %u changed to %d\n", current->pid, parent_pid);
             break;
         default:
