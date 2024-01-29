@@ -26,13 +26,12 @@ static int __init Virtual_addr_to_physical_addr(void){
     struct task_struct *task = get_pid_task(find_get_pid(my_pid), PIDTYPE_PID);
     struct mm_struct *mm;
     // struct vm_area_struct *vma;
-    struct page *pg;
     pgd_t *pgd;
     p4d_t *p4d;
     pmd_t *pmd;
     pud_t *pud;
-    pte_t *pte;
-    unsigned long pg_addr,page_offset;
+    pte_t pte;
+    
     unsigned long phy_addr;
     if(task == NULL){
         printk(KERN_INFO "Task not found with the given PID\n");
@@ -69,24 +68,21 @@ static int __init Virtual_addr_to_physical_addr(void){
         return 0;
     }
 
-    // pte = pte_offset_map(pmd, my_vaddr);
-    // if (pte_none(*pte)){
-    //     printk(KERN_INFO " pte error\n");
-    //     return 0;
-    // }
-    pte = pte_offset_kernel(pmd, my_vaddr);
-    if (pte_none(*pte)){
-        printk(KERN_INFO " pte error\n");
+    pte = *pte_offset_map(pmd, my_vaddr);
+    if(!pte_present(pte))
+    {
+        printk(KERN_INFO "not mapped in pte\n");
         return 0;
     }
-    
+
     /*pte to physical address*/
-    phy_addr = pte_pfn(*pte) << PAGE_SHIFT;
-    phy_addr |= my_vaddr & ~PAGE_MASK;
+    phy_addr = pte_pfn(pte) << PAGE_SHIFT;
+    /*add offset within page*/
+    phy_addr |= (my_vaddr & ~PAGE_MASK);
 
 
     printk(KERN_INFO "****____ Physical Address found for the given virtual adresss ____****\n");
-    printk(KERN_INFO "Pid : %d\n V_addr : %lx \n Phy_add : %lx", my_pid, my_vaddr, phy_addr);
+    printk(KERN_INFO "Pid : %d\n V_addr : 0x%lx \n Phy_add : 0x%lx", my_pid, my_vaddr, phy_addr);
     return 0;
 }
 

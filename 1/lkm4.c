@@ -16,6 +16,7 @@ static int my_pid = 1;
 module_param(my_pid,int,S_IRUGO);
 MODULE_PARM_DESC(my_pid,"Pid of the given task ");
 
+/*
 static bool isValid(struct mm_struct *mm, unsigned long my_vaddr){
     struct page *pg;
     pgd_t *pgd;
@@ -70,6 +71,7 @@ static bool isValid(struct mm_struct *mm, unsigned long my_vaddr){
     phy_addr = page_to_phys(pg);
     return phy_addr;
 }
+*/
 
 static int __init calculateTotalVM(void){
     struct task_struct *task = get_pid_task(find_get_pid(my_pid), PIDTYPE_PID);

@@ -22,7 +22,7 @@ static int __init printRunnableRunningTasks(void) {
 }
 
 static void __exit helloworld_exit(void) {
-    printk(KERN_INFO "Module Unloaded\n");
+    printk(KERN_INFO "------- LKM1 Module Unloaded ----------\n");
 }
 
 module_init(printRunnableRunningTasks);
