@@ -1,5 +1,5 @@
+obj-m += get_pagefaults.o
 obj-m += hello_procfs.o
-# obj-m += lkm4.o
 
 
 KDIR = /lib/modules/`uname -r`/build

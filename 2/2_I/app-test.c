@@ -15,7 +15,7 @@
 int main(){
     int *ptr = (int *)malloc(sizeof(int));
     int val;
-    *ptr = 55;
+    *ptr = 5;
     printf("ptr = %p\n", ptr);
     printf("Value = %d\n", *ptr);
 
@@ -35,8 +35,10 @@ int main(){
 
     printf("IOCTL-getting physical adress success...\n");
 
-    printf("Enter value to write to physical address: ");
-    scanf("%d", &val);
+    // printf("Enter value to write to physical address: ");
+    // scanf("%d", &val);
+
+    val=6;
 
     if(ioctl(fd,WRITE_TO_PHYSICAL, &val) < 0){
         printf("IOCTL failed...\n");

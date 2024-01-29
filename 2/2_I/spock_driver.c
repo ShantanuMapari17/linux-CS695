@@ -33,7 +33,7 @@ static unsigned long getPhysical(unsigned long v_addr, struct mm_struct *mm)
     p4d_t *p4d;
     pud_t *pud;
     pmd_t *pmd;
-    pte_t *ptep, pte;
+    pte_t pte;
     unsigned long p_addr = 0;
     struct page *page;
  

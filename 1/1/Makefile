@@ -1,4 +1,6 @@
-obj-m += hello_proc.o
+# obj-m += lkm1.o
+# obj-m += lkm2.o
+obj-m += lkm3.o
 # obj-m += lkm4.o
 
 
@@ -8,3 +10,4 @@ kbuild:
 	make -C $(KDIR) M=`pwd`
 clean:
 	make -C $(KDIR) M=`pwd` clean
+
